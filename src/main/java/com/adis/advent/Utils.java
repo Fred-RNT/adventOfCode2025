@@ -10,14 +10,18 @@ import java.util.function.Function;
 
 public class Utils {
 
-    public static <T> List<T> parseInputFile(String name, Function<String, T> mapper) throws IOException, URISyntaxException {
-        List<String> lines = Files.readAllLines(Paths.get(Utils.class.getResource("/"+name)
-                                                                  .toURI()));
-        List<T> result = new ArrayList<>();
+    public static <T> List<T> parseInputFile(String name, Function<String, T> mapper) {
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(Utils.class.getResource("/" + name)
+                                                                      .toURI()));
+            List<T> result = new ArrayList<>();
 
-        for (String line : lines) {
-            result.add(mapper.apply(line));
+            for (String line : lines) {
+                result.add(mapper.apply(line));
+            }
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return result;
     }
 }
