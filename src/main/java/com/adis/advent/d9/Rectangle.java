@@ -1,5 +1,6 @@
 package com.adis.advent.d9;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,7 +9,7 @@ public final class Rectangle {
     private final Point p2;
 
 
-    long xMin, xMax, yMin, yMax;
+    int xMin, xMax, yMin, yMax;
 
     public Rectangle(Point p1, Point p2) {
         xMin = Math.min(p1.x(), p2.x());
@@ -50,11 +51,26 @@ public final class Rectangle {
         Point pt3 = new Point(p1.x(), p2.y());
         Point pt4 = new Point(p2.x(), p1.y());
 
-        System.out.println(">>>Rectangle(" + aire() + ")");
         var res = isInside(pt3, polygone) & isInside(pt4, polygone);
-        System.out.println("<<<");
-        return res;
+        if(res){
+            return allBorderInside(polygone);
+        }
+        return false;
     }
+
+    private boolean allBorderInside(List<Arete> polygone) {
+        List<Point> content = new ArrayList<>();
+        for(int i = xMin+1; i < xMax ; i++){
+            content.add(new Point(i, yMax));
+            content.add(new Point(i, yMin));
+        }
+        for (int j = yMin+1; j < yMax; j++) {
+            content.add(new Point(xMax, j));
+            content.add(new Point(xMin, j));
+        }
+        return content.stream().allMatch(p -> isInside(p, polygone));
+    }
+
 
     private boolean isInside(Point pt, List<Arete> polygone) {
         //on compte le nb d'intersection entre le segment [(0,pt.y),pt] et les aretes. Si c'est pair, on est dedans, si c'est impair on est dehors
@@ -63,19 +79,19 @@ public final class Rectangle {
         int intersection = 0;
         for (Arete arete : polygone) {
             if (pt.equals(arete.point1()) || pt.equals(arete.point2())) {
-                System.out.println(pt + "dans forme");
+                //System.out.println(pt + "dans forme");
                 return true;
             } else {
                 var inter =  (intersecte(arete, pt));
                 if(inter==-1){
-                    System.out.println(pt + "dans forme");
+                    //System.out.println(pt + "dans forme");
                     return true;
                 }
                 intersection+=inter;
             }
         }
 
-        System.out.println(pt + "intersection=" + intersection);
+        //System.out.println(pt + "intersection=" + intersection);
         return intersection % 2 == 1;
     }
 
