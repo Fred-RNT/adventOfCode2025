@@ -23,31 +23,6 @@ public final class Rectangle {
         return (long) (Math.abs(p1.x() - p2.x()) + 1) * (Math.abs(p1.y() - p2.y()) + 1);
     }
 
-    public boolean isEligible(int nieme, List<Rectangle> rects) {
-        Point pt3 = new Point(p1.x(), p2.y());
-        Point pt4 = new Point(p2.x(), p1.y());
-
-        for (int i = nieme + 1; i < rects.size(); i++) {
-            var rect = rects.get(i);
-            if (rect.contains(pt3) && rect.contains(pt4)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean contains(Point pt) {
-        return xMin <= pt.x() && xMax >= pt.x() && yMin <= pt.y() && yMax >= pt.y();
-    }
-
-    public Point p1() {
-        return p1;
-    }
-
-    public Point p2() {
-        return p2;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
@@ -75,9 +50,9 @@ public final class Rectangle {
         Point pt3 = new Point(p1.x(), p2.y());
         Point pt4 = new Point(p2.x(), p1.y());
 
-        //System.out.println(">>>Rectangle(" + aire() + ")");
-        var res = isInside(pt3, polygone) && isInside(pt4, polygone);
-        //System.out.println("<<<");
+        System.out.println(">>>Rectangle(" + aire() + ")");
+        var res = isInside(pt3, polygone) & isInside(pt4, polygone);
+        System.out.println("<<<");
         return res;
     }
 
@@ -88,32 +63,45 @@ public final class Rectangle {
         int intersection = 0;
         for (Arete arete : polygone) {
             if (pt.equals(arete.point1()) || pt.equals(arete.point2())) {
-                //System.out.println(pt + "dans forme");
+                System.out.println(pt + "dans forme");
                 return true;
-            } else if (intersecte(arete, pt)) {
-                intersection++;
+            } else {
+                var inter =  (intersecte(arete, pt));
+                if(inter==-1){
+                    System.out.println(pt + "dans forme");
+                    return true;
+                }
+                intersection+=inter;
             }
         }
 
-        //System.out.println(pt + "intersection=" + intersection);
+        System.out.println(pt + "intersection=" + intersection);
         return intersection % 2 == 1;
     }
 
-    private boolean intersecte(Arete arete, Point pt) {
+    //-1 = dans le segment, 0 = pas d'intersection, 1 = intersection
+    private int intersecte(Arete arete, Point pt) {
         //si ligne horizontale
         if (arete.horizontal()) {
             if (pt.y() != arete.point1().y()) {
-                return false;
+                return 0;
             }
 
-            return pt.x() >= arete.minX();
+            if(pt.x() >= arete.minX() && pt.x()<=arete.maxX()){
+                return -1;
+            }
+            return pt.x()<arete.minX()?0: 1;
         } else {
             //ligne verticale
             if (arete.minY() > pt.y() || arete.maxY() < pt.y()) {
-                return false;
+                return 0;
             }
-            //sinon le y est entre les 2, il faut voir si x >= xmax
-            return pt.x() >= arete.maxX();
+            //sinon le y est entre les 2, il faut voir si on est sur la ligne ou si x >= xmax
+            
+            if(pt.x() == arete.maxX()){
+                return -1;
+            }
+            return pt.x() > arete.maxX()?1:0;
         }
     }
 }

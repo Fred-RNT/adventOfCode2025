@@ -47,8 +47,10 @@ public class D9 {
             }
         }
         rects.sort(Comparator.comparing(Rectangle::aire).reversed());
+        System.out.println(rects.getFirst().aire());
+        System.out.println(rects.getLast().aire());
 
-        final var rectangle = rects.stream().sequential().filter(rec -> rec.fitInto(polygone)).findFirst().get();
+        final var rectangle = rects.stream().filter(rec -> rec.fitInto(polygone)).findFirst().get();
         System.out.println(rectangle);
         System.out.println(rectangle.aire());
     }
