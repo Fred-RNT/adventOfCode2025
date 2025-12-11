@@ -10,4 +10,13 @@ public class Bouton {
             switches[i] = Integer.parseInt(tmp[i]);
         }
     }
+
+    public boolean canSwitch(int aSwitcher) {
+        for (int aSwitch : switches) {
+            if(aSwitch == aSwitcher){
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -1,5 +1,7 @@
 package com.adis.advent.d10;
 
+import com.microsoft.z3.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,5 +89,55 @@ public class Machine {
 
     public int mini() {
         return mini;
+    }
+
+    public int resolveJoltage() {
+        try (Context ctx = new Context()) {
+            Optimize opt = ctx.mkOptimize();
+
+            IntExpr[] nbAppuis = new IntExpr[boutons.length];
+            for (int i = 0; i < boutons.length; i++) {
+                nbAppuis[i] = ctx.mkIntConst("button_" + i);
+                // Contrainte : nombre d'appuis >= 0
+                opt.Add(ctx.mkGe(nbAppuis[i], ctx.mkInt(0)));
+            }
+
+            for (int j = 0; j < joltage.length; j++) {
+                //au debut on a zero appuis
+                ArithExpr<IntSort> somme = ctx.mkInt(0);
+
+                for (int i = 0; i < boutons.length; i++) {
+                    // Vérifier si ce bouton affecte ce joltage
+                    if (boutons[i].canSwitch(j)) {
+                        somme = ctx.mkAdd(somme, nbAppuis[i]);
+                    }
+                }
+
+                // Contrainte : la somme doit égaler l'état final
+                opt.Add(ctx.mkEq(somme, ctx.mkInt(joltage[j])));
+            }
+
+            // minimiser la somme des appuis
+            ArithExpr<IntSort> totalAppuis = ctx.mkInt(0);
+            for (IntExpr appui : nbAppuis) {
+                totalAppuis = ctx.mkAdd(totalAppuis, appui);
+            }
+            opt.MkMinimize(totalAppuis);
+
+            // Résoudre
+            if (opt.Check() == Status.SATISFIABLE) {
+                Model model = opt.getModel();
+                int total = 0;
+                for (int i = 0; i < nbAppuis.length; i++) {
+                    int valeur = ((IntNum) model.evaluate(nbAppuis[i], false)).getInt();
+                        System.out.printf("[Bt%d->%d]", i, valeur);
+                    total += valeur;
+                }
+                System.out.printf(" Somme: %d%n",total);
+                return total;
+            } else {
+                throw new RuntimeException("Oups i did it again");
+            }
+        }
     }
 }
