@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Server {
+public class Serveur {
     String label;
-    List<Server> destinations;
+    List<Serveur> destinations;
 
-    public Server(String label) {
+    public Serveur(String label) {
         this.label = label;
         destinations = new ArrayList<>();
     }
 
-    public void addDestination(Server toAdd){
+    public void addDestination(Serveur toAdd){
         destinations.add(toAdd);
     }
 

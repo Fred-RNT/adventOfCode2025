@@ -25,9 +25,31 @@ public class D9 {
     }
 
     private void resolve() {
+        List<Arete> polygone = buildPolygone();
+
+        List<Rectangle> rects = buildRectangles();
+        rects.sort(Comparator.comparing(Rectangle::aire).reversed());
+
+        final var rectangle = rects.stream().filter(rec -> rec.fitInto(polygone)).findFirst().get();
+        System.out.println(rectangle);
+        System.out.println(rectangle.aire());
+    }
+
+    private List<Rectangle> buildRectangles() {
+        List<Rectangle> rects = new ArrayList<>();
+        int size = points.size();
+        for (int idxPt1 = 0; idxPt1 < size; idxPt1++) {
+            for (int idxPt2 = idxPt1 + 1; idxPt2 < size; idxPt2++) {
+                var rec = new Rectangle(points.get(idxPt1), points.get(idxPt2));
+                rects.add(rec);
+            }
+        }
+        return rects;
+    }
+
+    private List<Arete> buildPolygone() {
         List<Arete> polygone = new ArrayList<>();
 
-        //on va faire du dessin
         var ptIterator = points.iterator();
         var premier = ptIterator.next();
         var current = premier;
@@ -37,22 +59,7 @@ public class D9 {
             current = nextPt;
         }
         polygone.add(new Arete(current, premier));
-
-        List<Rectangle> rects = new ArrayList<>();
-        int size = points.size();
-        for (int idxPt1 = 0; idxPt1 < size; idxPt1++) {
-            for (int idxPt2 = idxPt1 + 1; idxPt2 < size; idxPt2++) {
-                var rec = new Rectangle(points.get(idxPt1), points.get(idxPt2));
-                rects.add(rec);
-            }
-        }
-        rects.sort(Comparator.comparing(Rectangle::aire).reversed());
-        System.out.println(rects.getFirst().aire());
-        System.out.println(rects.getLast().aire());
-
-        final var rectangle = rects.stream().filter(rec -> rec.fitInto(polygone)).findFirst().get();
-        System.out.println(rectangle);
-        System.out.println(rectangle.aire());
+        return polygone;
     }
 
 }
