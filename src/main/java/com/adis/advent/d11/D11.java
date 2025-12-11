@@ -3,14 +3,11 @@ package com.adis.advent.d11;
 import com.adis.advent.Tuple;
 import com.adis.advent.Utils;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class D11 {
 
@@ -52,33 +49,53 @@ public class D11 {
     }
 
     private void resolve() {
-        Deque<Server> chemin = new ArrayDeque<>();
-        chemin.add(machines.get("svr"));
-        var res = traverse(machines.get("svr"), machines.get("out"), chemin);
-        System.out.println(res);
+        final var debut = machines.get("svr");
+        final var fin = machines.get("out");
+
+        Map<Server, Long> memo = new HashMap<>();
+        final var fft = machines.get("fft");
+        final var dac = machines.get("dac");
+
+        var debutVersFft = traverseAcyclique(debut, fft, memo, dac);
+        memo = new HashMap<>();
+        var fftVersDac = traverseAcyclique(fft, dac, memo, fin);
+        memo = new HashMap<>();
+        var dacVersFin = traverseAcyclique(dac, fin, memo, fft);
+
+        var cout1 = debutVersFft * fftVersDac * dacVersFin;
+
+        memo = new HashMap<>();
+        var debutVersDac = traverseAcyclique(debut, dac, memo, fft);
+        memo = new HashMap<>();
+        var dacVersFft = traverseAcyclique(dac, fft, memo, fin);
+        memo = new HashMap<>();
+        var fftVersFin = traverseAcyclique(fft, fin, memo, dac);
+
+        var cout2 = debutVersDac * dacVersFft * fftVersFin;
+
+        System.out.println(cout1 + cout2);
     }
 
-    private int traverse(Server start, Server end, Deque<Server> chemin) {
+
+    private long traverseAcyclique(Server start, Server end, Map<Server, Long> coutsCalcules, Server pointInterdit) {
         if (start.equals(end)) {
-            if (chemin.contains(machines.get("fft")) && chemin.contains(machines.get("dac"))) {
-                System.out.println(chemin.stream().map(s -> s.label).collect(Collectors.joining(",")));
-                return 1;
-            } else {
-                return 0;
-            }
+            return 1;
         }
-        if (start.destinations.isEmpty()) {
-            return 0;
+
+        if (coutsCalcules.containsKey(start)) {
+            return coutsCalcules.get(start);
         }
-        var compteur = 0;
+
+        long compteur = 0;
         for (Server s : start.destinations) {
-            if (chemin.contains(s)) {
+            if (pointInterdit.label.equals(s.label)) {
                 continue;
             }
-            chemin.add(s);
-            compteur += traverse(s, end, chemin);
-            chemin.remove(s);
+            compteur += traverseAcyclique(s, end, coutsCalcules, pointInterdit);
         }
+
+        coutsCalcules.put(start, compteur);
         return compteur;
     }
+
 }
