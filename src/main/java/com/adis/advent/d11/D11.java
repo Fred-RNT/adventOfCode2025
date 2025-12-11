@@ -11,25 +11,25 @@ import java.util.Map;
 
 public class D11 {
 
-    Map<String, Server> machines;
+    Map<String, Server> baieDeStockage;
 
     public D11(String input) {
         var toProcess = Utils.parseInputFile(input, this::parseLigne);
-        machines = new HashMap<>();
+        baieDeStockage = new HashMap<>();
         for (Tuple<String, List<String>> t : toProcess) {
             var serverName = t.item1();
-            machines.put(serverName, new Server(serverName));
+            baieDeStockage.put(serverName, new Server(serverName));
         }
         for (Tuple<String, List<String>> t : toProcess) {
             var liaisons = t.item2();
             var serverName = t.item1();
-            var serveur = machines.get(serverName);
+            var serveur = baieDeStockage.get(serverName);
             for (String liaison : liaisons) {
-                if (machines.get(liaison) == null) {
+                if (baieDeStockage.get(liaison) == null) {
                     System.out.println("attention on va creer le serveur " + liaison);
-                    machines.put(liaison, new Server(liaison));
+                    baieDeStockage.put(liaison, new Server(liaison));
                 }
-                serveur.addDestination(machines.get(liaison));
+                serveur.addDestination(baieDeStockage.get(liaison));
             }
         }
 
@@ -49,12 +49,12 @@ public class D11 {
     }
 
     private void resolve() {
-        final var debut = machines.get("svr");
-        final var fin = machines.get("out");
+        final var debut = baieDeStockage.get("svr");
+        final var fin = baieDeStockage.get("out");
 
         Map<Server, Long> memo = new HashMap<>();
-        final var fft = machines.get("fft");
-        final var dac = machines.get("dac");
+        final var fft = baieDeStockage.get("fft");
+        final var dac = baieDeStockage.get("dac");
 
         var debutVersFft = traverseAcyclique(debut, fft, memo, dac);
         memo = new HashMap<>();
